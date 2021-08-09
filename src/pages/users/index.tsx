@@ -1,17 +1,21 @@
-import { Heading, Box, Flex, Button, Icon, Table, Thead, Tr, Th, Checkbox, Tbody, Td, Text, useBreakpointValue, Spinner } from "@chakra-ui/react";
-import React from "react";
+import { Heading, Box, Flex, Button, Icon, Table, Thead, Tr, Th, Checkbox, Tbody, Td, Text, useBreakpointValue, Spinner, Link } from "@chakra-ui/react";
+import React, { useState } from "react";
 import { RiAddLine, RiPencilLine } from "react-icons/ri";
 import { Header } from "../../components/Header"
 import { Pagination } from "../../components/Pagination";
 import { Sidebar } from "../../components/Sidebar";
-import Link from "next/link"
+import NextLink from "next/link"
 import { useUsers } from "../../services/hooks/useUsers";
+import { queryClient } from "../../services/queryClient";
+import { api } from "../../services/api";
 
 
 
 export default function UserList() {
 
-    const { data, isLoading, isFetching, error, refetch } = useUsers();
+    const [page, setPage] = useState(1);
+
+    const { data, isLoading, isFetching, error, refetch } = useUsers(page);
 
     // console.log(isLoading);
 
@@ -21,6 +25,17 @@ export default function UserList() {
         lg: true,
     })
 
+    async function handlePrefecthUser(userId: string) {
+        await queryClient.prefetchQuery(['user', userId], async () => {
+            const response = await api.get(`users/${userId}`)
+
+            return response.data;
+        }, {
+            staleTime: 1000 * 60 * 5 //5 minutes
+
+
+        })
+    }
 
     // useEffect(() => {
     //     fetch('http://localhost:3000/api/users')
@@ -44,7 +59,7 @@ export default function UserList() {
 
                         </Heading>
 
-                        <Link href="/users/create" passHref>
+                        <NextLink href="/users/create" passHref>
                             <Button
                                 as="a"
                                 size="sm"
@@ -54,7 +69,7 @@ export default function UserList() {
                             >
                                 Criar novo
                             </Button>
-                        </Link>
+                        </NextLink>
 
 
                     </Flex>
@@ -85,7 +100,7 @@ export default function UserList() {
                                         </Tr>
                                     </Thead>
                                     <Tbody>
-                                        {data.map(user => {
+                                        {data.users.map(user => {
 
                                             return (
                                                 <Tr key={user.id}>
@@ -94,7 +109,10 @@ export default function UserList() {
                                                     </Td>
                                                     <Td>
                                                         <Box>
-                                                            <Text fontWeight="bold">{user.name}</Text>
+                                                            <Link color="purple.400" onMouseEnter={() => handlePrefecthUser(user.id)}>
+                                                                <Text fontWeight="bold">{user.name}</Text>
+                                                            </Link>
+
                                                             <Text fontSize="sm" color="gray.300">{user.email}</Text>
                                                         </Box>
                                                     </Td>
@@ -124,9 +142,9 @@ export default function UserList() {
                                 </Table>
 
                                 <Pagination
-                                    totalCountOfRegisters={200}
-                                    currentPage={5}
-                                    onPageChange={() => { }}
+                                    totalCountOfRegisters={data.totalCount}
+                                    currentPage={page}
+                                    onPageChange={setPage}
 
                                 />
 
