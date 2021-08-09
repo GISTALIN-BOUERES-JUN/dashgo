@@ -1,12 +1,10 @@
 import { Heading, Box, Flex, Button, Icon, Table, Thead, Tr, Th, Checkbox, Tbody, Td, Text, useBreakpointValue, Spinner } from "@chakra-ui/react";
-import React, { useEffect } from "react";
+import React from "react";
 import { RiAddLine, RiPencilLine } from "react-icons/ri";
 import { Header } from "../../components/Header"
 import { Pagination } from "../../components/Pagination";
 import { Sidebar } from "../../components/Sidebar";
 import Link from "next/link"
-import { useQuery } from 'react-query'
-import { api } from '../../services/api'
 import { useUsers } from "../../services/hooks/useUsers";
 
 
@@ -125,7 +123,12 @@ export default function UserList() {
 
                                 </Table>
 
-                                <Pagination />
+                                <Pagination
+                                    totalCountOfRegisters={200}
+                                    currentPage={5}
+                                    onPageChange={() => { }}
+
+                                />
 
                             </>
 
